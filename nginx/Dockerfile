@@ -5,3 +5,5 @@ RUN cd / \
     && chown nginx:nginx logs \
     && mkdir -m 775 www \
     && chown nginx:nginx www \
+    && mkdir -m 775 wwwroot \
+    && chown nginx:nginx wwwroot \
