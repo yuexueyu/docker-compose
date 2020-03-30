@@ -213,10 +213,10 @@ FLUSH PRIVILEGES;
 	# 错误的
 	$redis = new Redis;
 	$rs = $redis->connect('127.0.0.1', 6379);
-	
 	```
 	
 	php连接不上，查看错误日志
+
 	```
 	PHP Fatal error:  Uncaught RedisException: Redis server went away in /www/index.php:7
 	```
@@ -346,3 +346,101 @@ docker rmi $(docker images | awk '/^<none>/ { print $3 }')
 * `cap_add，cap_drop` 添加或放弃容器的Linux能力（Capability）
 * `dns_search` 配置DNS搜索域。可以是一个值也可以是一个列表
 * 注意：使用compose对Docker容器进行编排管理时，需要编写docker-compose.yml文件，初次编写时，容易遇到一些比较低级的问题，导致执行docker-compose up时先解析yml文件的错误。比较常见的是yml对缩进的严格要求。yml文件还行后的缩进，不允许使用tab键字符，只能使用空格，而空格的数量也有要求，一般两个空格。
+
+### 后台启动服务容器 
+
+```
+docker-compose up -d
+```
+
+### 启动所有已经存在的服务容器 
+
+```
+docker-compose start
+```
+
+### 停止所有已经处于运行状态的容器 
+
+```
+docker-compose stop
+```
+
+### 重启所有已经存在的容器 
+
+```
+docker-compose restart
+```
+
+### 启动 / 停止 / 重启 指定 (例如 php) 服务容器 
+
+```
+docker-compose start/stop/restart php
+```
+
+### 禁止docker启动时，容器自动启动
+
+```
+docker update --restart=no $(docker ps -a -q)
+```
+
+### 删除所有 (停止状态的) 服务容器 
+
+```
+docker-compose rm
+```
+
+### 强制删除所有服务容器 
+
+```
+docker-compose rm -f
+```
+
+### 验证 Compose 文件格式是否正确 
+
+```
+docker-compose config
+```
+
+### 关闭所有正在运行容器
+
+```
+docker ps | awk  '{print $1}' | xargs docker stop
+或
+docker stop $(docker ps -a -q)
+```
+
+### 删除所有容器应用
+
+```
+docker ps -a | awk  '{print $1}' | xargs docker rm
+或
+docker rm $(docker ps -a -q)
+```
+
+### 删除所有数据卷
+
+```
+docker volume rm $(docker volume ls -q)
+```
+
+### 删除所有network
+
+```
+docker network rm $(docker network ls -q)
+```
+
+### 删除所有镜像
+```
+docker rmi $(docker images -q)
+```
+
+### 清场五连
+
+```
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+docker volume rm $(docker volume ls -q) 
+docker network rm $(docker network ls -q)
+docker rmi $(docker images -q)
+```
+

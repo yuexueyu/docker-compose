@@ -1,119 +1,158 @@
-#  nginx:1.17.2 + mysql:5.7.27 + php:7.3.8-fpm + redis:5.0.5
-###redis的最新版本是5.0.2，redis镜像最新的版本是5.0.5
-#  docker pull nginx:1.17.2
-#  docker pull mysql:5.7.27
-#  docker pull php:7.3.8-fpm
-#  docker pull redis:5.0.5
+#  以前的仅供参考
+#  以后部署，和线上环境保持一致
+#  
 #
-#  cd nginx && docker build -t nginx:1.17.2-build .
-#  cd mysql && docker build -t mysql:5.7.27-build .
-#  cd php && docker build -t php:7.3.8-fpm-build .
-#  cd redis && docker build -t redis:5.0.5-build .
+#  docker pull busybox:latest
+#  docker pull nginx:latest
+#  docker pull php:7.2-fpm
+#  docker pull mysql:5.6
+#  docker pull redis:latest
+#
+#  cd php && docker build -t php:7.2-fpm-build .
+#
 #  docker-compose up
 
-version: "3.2"
+version: '2'
 
 services:
-  nginx:
-#    build: ./nginx
-    image: nginx:1.17.2-build
-    depends_on:
-    - php
-    ports:
-    - "80:80"
-    - "443:443"
-    volumes:
-    - ./www:/www
-    - /Users/wu/www:/wwwroot
-    # ssl的证书耶放在conf.d里吧
-    - ./nginx/conf.d:/etc/nginx/conf.d
-    - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-    - ./nginx/logs:/logs
-    networks:
-      mylnmp_net:
-        ipv4_address: 192.170.1.11
-    extra_hosts:
-    - "test.do:127.0.0.1"
-    - "laravel.do:127.0.0.1"
-    - "lumen.do:127.0.0.1"
-    - "yii2-basic.do:127.0.0.1"
-    - "yii2-advanced.do:127.0.0.1"
-    - "xxnapi.do:127.0.0.1"
-    - "xxnadmin.do:127.0.0.1"
+  www:
+    image: busybox:latest
+    container_name: www
     restart: always
-    container_name: mylnmp-nginx
     privileged: true
+    tty: true
+    volumes:
+      # - ../:/www
+      - ./data:/data
+      - ../../myGithub:/www/myGithub
+      - ../../taobao:/www/taobao
+    networks:
+      cluster_network:
+        ipv4_address: 192.170.1.10
     environment:
-    - TZ=Asia/Shanghai
+      - TZ=Asia/Shanghai
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    privileged: true
+    tty: true
+    depends_on:
+      - php
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d/:/etc/nginx/conf.d/:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ca/:/etc/nginx/ca
+      - ./nginx/log:/var/log/nginx/:rw
+    volumes_from:
+      - www
+    networks:
+      cluster_network:
+        ipv4_address: 192.170.1.11
+    environment:
+      - TZ=Asia/Shanghai
+    extra_hosts:
+      - xxnapi.me:172.22.0.10
+      - xxnadmin.me:172.22.0.10
+      - douyin.me:172.22.0.10
+      - yiyao.local:172.22.0.10
+      - myshop.local:172.22.0.10
+      - blog.local:172.22.0.10
 
   php:
-#    build: ./php
-    # pecl install 构建的
-    image: php:7.3.8-fpm-build
-    # 源码包构建的
-#    image: php:7.3.8-fpm-build-2
-    ports:
-    - "9000:9000"
-    volumes:
-    - ./www:/www
-    - /Users/wu/www:/wwwroot
-    - ./php/config/php.ini:/usr/local/etc/php/php.ini
-    - ./php/config/php-fpm.conf:/usr/local/etc/php-fpm.conf
-    - ./php/config/php-fpm.d:/usr/local/etc/php-fpm.d
-    networks:
-      mylnmp_net:
-        ipv4_address: 192.170.1.12
+    image: registry.cn-hangzhou.aliyuncs.com/soft_image/php:7.1.23-fpm
+    container_name: php
     restart: always
-    container_name: mylnmp-php
     privileged: true
+    ports:
+      - "9000:9000"
+    depends_on:
+      - mysql
+      - redis
+    volumes:
+      - ./php/php.ini:/usr/local/etc/php/php.ini:ro
+      - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
+      - ./php/php-fpm.d:/usr/local/etc/php-fpm.d
+      - ./php/conf.d:/usr/local/etc/php/conf.d
+      - ./php/log:/var/log/:rw
+      - ./mysql/mysqld:/dev/shm
+    volumes_from:
+      - www
+    networks:
+      cluster_network:
+        ipv4_address: 192.170.1.12
     environment:
-    - TZ=Asia/Shanghai
+      - TZ=Asia/Shanghai
 
   mysql:
-#    build: ./mysql
-    image: mysql:5.7.27-build
-    ports:
-    - "3306:3306"
-    volumes:
-    - ./mysql/data:/var/lib/mysql
-    - ./mysql/my.cnf:/etc/my.cnf
-    - ./mysql/logs:/logs
-    environment:
-    - TZ=Asia/Shanghai
-    - MYSQL_ROOT_PASSWORD=123456
-    # 创建一个用户，初始化一下mysql
-    - MYSQL_USER=root
-    - MYSQL_PASSWORD=123qwe
-    networks:
-      mylnmp_net:
-        ipv4_address: 192.170.1.13
+    image: mysql:5.6
+    container_name: mysql
     restart: always
-    container_name: mylnmp-mysql
     privileged: true
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/my.cnf:/etc/mysql/mysql.conf.d/my.cnf:ro
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/log:/var/lib/log
+      - ./mysql/mysqld:/var/run/mysqld
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      # 创建一个用户，初始化一下mysql
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - TZ=Asia/Shanghai
+    networks:
+      cluster_network:
+        ipv4_address: 192.170.1.13
 
   redis:
-#    build: ./redis
-    image: redis:5.0.5
-    ports:
-    - "6379:6379"
-    volumes:
-    - ./redis/redis.conf/:/usr/local/etc/redis.conf
-    - ./redis/data:/usr/local/redis/data
-    - ./redis/redis.log:/usr/local/redis/redis.log
-    command: redis-server /usr/local/etc/redis.conf
-    networks:
-      mylnmp_net:
-        ipv4_address: 192.170.1.14
+    image: redis:latest
+    container_name: redis
     restart: always
-    container_name: mylnmp-redis
     privileged: true
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/redis.conf:/etc/redis/redis.conf:ro
+      - ./redis/db:/var/db
+      - ./redis/log:/var/log
+    command: redis-server /etc/redis/redis.conf
+    networks:
+      cluster_network:
+        ipv4_address: 192.170.1.14
     environment:
-    - TZ=Asia/Shanghai
+      - TZ=Asia/Shanghai
+
+  node:
+    image: registry.cn-hangzhou.aliyuncs.com/soft_image/node:10.16.3
+    container_name : node
+    restart: always
+    privileged: true
+    tty: true
+    depends_on:
+      - mysql
+    volumes_from:
+      - www
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "8082:8082"
+    # command: /bin/bash -c 'cd /www/taobao/school-talent-market/server && npm run auto'
+    networks:
+      cluster_network:
+        ipv4_address: 192.170.1.15
+    environment:
+      - TZ=Asia/Shanghai
 
 networks:
-  mylnmp_net:
+  cluster_network:
     driver: bridge
     ipam:
       driver: default
       config:
-      - subnet: 192.170.1.1/16
+        - subnet: 192.170.1.1/24
