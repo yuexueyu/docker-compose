@@ -128,6 +128,23 @@ services:
     environment:
       - TZ=Asia/Shanghai
 
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: always
+    privileged: true
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/data/logs
+    volumes:
+      - ./mongo/db:/data/db
+      - ./mongo/log:/data/logs
+    networks:
+      cluster_network:
+        ipv4_address: 192.170.1.16
+
   node:
     image: registry.cn-hangzhou.aliyuncs.com/soft_image/node:10.16.3
     container_name : node
@@ -139,6 +156,7 @@ services:
     volumes_from:
       - www
     ports:
+      - "3000:3000"
       - "8080:8080"
       - "8081:8081"
       - "8082:8082"
