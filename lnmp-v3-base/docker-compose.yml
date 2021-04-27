@@ -25,7 +25,7 @@ services:
       - ./data:/data
       - ../../testCode:/www/test
     networks:
-      - lnmpv3base_network
+      - lnmpv3_network
     environment:
       - TZ=Asia/Shanghai
 
@@ -48,7 +48,7 @@ services:
     volumes_from:
       - www
     networks:
-      - lnmpv3base_network
+      - lnmpv3_network
     environment:
       - TZ=Asia/Shanghai
 
@@ -72,7 +72,7 @@ services:
     volumes_from:
       - www
     networks:
-      - lnmpv3base_network
+      - lnmpv3_network
     environment:
       - TZ=Asia/Shanghai
 
@@ -95,7 +95,7 @@ services:
       - MYSQL_PASSWORD=root
       - TZ=Asia/Shanghai
     networks:
-      - lnmpv3base_network
+      - lnmpv3_network
 
   redis:
     image: redis:latest
@@ -110,7 +110,7 @@ services:
       - ./redis/log:/var/log
     command: redis-server /etc/redis/redis.conf
     networks:
-      - lnmpv3base_network
+      - lnmpv3_network
     environment:
       - TZ=Asia/Shanghai
 
@@ -128,7 +128,7 @@ services:
       - ./mongo/db:/data/db
       - ./mongo/log:/data/logs
     networks:
-      - lnmpv3base_network
+      - lnmpv3_network
 
   node:
     image: registry.cn-hangzhou.aliyuncs.com/soft_image/node:10.16.3
@@ -147,10 +147,10 @@ services:
 #      - "8082:8082"
     # command: /bin/bash -c 'cd /www/taobao/school-talent-market/server && npm run auto'
     networks:
-      - lnmpv3base_network
+      - lnmpv3_network
     environment:
       - TZ=Asia/Shanghai
 
 networks:
-  lnmpv3base_network:
+  lnmpv3_network:
     driver: bridge
