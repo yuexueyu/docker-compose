@@ -1,0 +1,132 @@
+#  nginx:1.17.2 + mysql:5.7.27 + php:7.3.8-fpm + redis:5.0.5
+###redis的最新版本是5.0.2，redis镜像最新的版本是5.0.5
+#  docker pull nginx:1.17.2
+#  docker pull mysql:5.7.27
+#  docker pull php:7.3.8-fpm
+#  docker pull redis:5.0.5
+#
+#  cd nginx && docker build -t nginx:1.17.2-build .
+#  cd mysql && docker build -t mysql:5.7.27-build .
+#  cd php && docker build -t php:7.3.8-fpm-build .
+#  cd redis && docker build -t redis:5.0.5-build .
+#  docker-compose up
+
+version: "3.2"
+
+services:
+  www:
+    image: busybox:latest
+    container_name: my-www
+    restart: always
+    privileged: true
+    tty: true
+    volumes:
+      - ./www:/www
+    networks:
+      my-network:
+        ipv4_address: 192.170.1.10
+    environment:
+      - TZ=Asia/Shanghai
+
+  nginx:
+    image: nginx:latest
+    container_name: my-nginx
+    restart: always
+    privileged: true
+    depends_on:
+      - php
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - www
+    volumes:
+    # ssl的证书耶放在conf.d里吧
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/logs:/logs
+    networks:
+      my-network:
+        ipv4_address: 192.170.1.11
+    environment:
+      - TZ=Asia/Shanghai
+    extra_hosts:
+      - "test.do:127.0.0.1"
+      - "laravel54.do:127.0.0.1"
+      - "laravel.do:127.0.0.1"
+      - "lumen.do:127.0.0.1"
+      - "yii2-basic.do:127.0.0.1"
+      - "yii2-advanced.do:127.0.0.1"
+      - "xxnapi.do:127.0.0.1"
+      - "xxnadmin.do:127.0.0.1"
+      - "tp5.do:127.0.0.1"
+      - "douyin.do:127.0.0.1"
+
+  php:
+#    build: ./php
+    image: php:7.2-fpm-build
+    container_name: my-php
+    restart: always
+    privileged: true
+    ports:
+      - "9000:9000"
+    links:
+      - www
+    volumes:
+      - ./php/config/php.ini:/usr/local/etc/php/php.ini
+      - ./php/config/php-fpm.conf:/usr/local/etc/php-fpm.conf
+      - ./php/config/php-fpm.d:/usr/local/etc/php-fpm.d
+      - ./mysql/mysqld:/dev/shm
+    networks:
+      my-network:
+        ipv4_address: 192.170.1.12
+    environment:
+      - TZ=Asia/Shanghai
+
+  mysql:
+    image: mysql:5.6
+    container_name: my-mysql
+    restart: always
+    privileged: true
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/mysqld:/var/run/mysqld
+      - ./mysql/my.cnf:/etc/my.cnf
+      - ./mysql/logs:/logs
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=123456
+      # 创建一个用户，初始化一下mysql
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=123qwe
+    networks:
+      my-network:
+        ipv4_address: 192.170.1.13
+
+  redis:
+    image: redis:latest
+    container_name: my-redis
+    restart: always
+    privileged: true
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/redis.conf/:/usr/local/etc/redis.conf
+      - ./redis/data:/usr/local/redis/data
+      - ./redis/redis.log:/usr/local/redis/redis.log
+    command: redis-server /usr/local/etc/redis.conf
+    networks:
+      my-network:
+        ipv4_address: 192.170.1.14
+    environment:
+    - TZ=Asia/Shanghai
+
+networks:
+  my-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.170.1.1/16

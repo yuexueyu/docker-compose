@@ -1,0 +1,64 @@
+## 安装框架
+# cd /easyswoole \
+#     && composer require easyswoole/easyswoole=3.4.x \
+#     && php vendor/easyswoole/easyswoole/bin/easyswoole install && composer dump-autoload
+## 安装框架依赖
+# cd /easyswoole && \
+# composer require easyswoole/swoole-ide-helper && \
+# composer require easyswoole/mysqli && \
+# composer require easyswoole/orm && \
+# composer require easyswoole/redis && \
+# composer require easyswoole/pool &&  \
+# composer require easyswoole/redis-pool && \
+# composer require easyswoole/fast-cache && \
+# composer require easyswoole/http-client && \
+# composer require easyswoole/component && \
+# composer require easyswoole/hot-reload && \
+# composer require easyswoole/trigger && \
+# composer require easyswoole/socket && \
+# composer require nette/php-generator && \
+# composer require easyswoole/http-annotation && \
+# composer require php-curl-class/php-curl-class && \
+# composer require easyswoole/command && \
+# composer require easyswoole/code-generation=2.x && \
+# composer require easyswoole/task && \
+# composer require easyswoole/annotation &&  \
+# composer require easyswoole/phpunit && \
+# composer require easyswoole/http && \
+# composer require easyswoole/queue && \
+# composer require easyswoole/template &&  \
+# composer require easyswoole/spl && \
+# composer require easyswoole/utility && \
+# composer require easyswoole/pay && \
+# composer require smarty/smarty && \
+# composer dump-autoload
+## 启动服务
+# cd /easyswoole && php easyswoole server start -d -mode=dev
+
+
+version: '2'
+
+services:
+  www:
+    image: easyswoole:latest
+    container_name: easyswoole
+    restart: always
+    privileged: true
+    tty: true
+    ports:
+      - "9501:9501"
+    volumes:
+      - ../../zhongyuanibCode/zhongyuan/backend/9501-paymentplatform2021:/easyswoole
+    networks:
+      swoole_network:
+        ipv4_address: 192.181.1.10
+    environment:
+      - TZ=Asia/Shanghai
+
+networks:
+  swoole_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.181.1.1/24

@@ -1,0 +1,1 @@
+FROM daocloud.io/library/redis:latest

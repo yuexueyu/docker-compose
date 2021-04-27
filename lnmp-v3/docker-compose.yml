@@ -1,0 +1,174 @@
+#  以前的仅供参考
+#  以后部署，和线上环境保持一致
+#  受到 yktour-docker启发修改
+#  曾适用于淘宝项目开发
+#
+#  docker pull busybox:latest
+#  docker pull nginx:latest
+#  docker pull php:7.2-fpm
+#  docker pull mysql:5.6
+#  docker pull redis:latest
+#
+#  cd php && docker build -t php:7.2-fpm-build .
+#
+#  docker-compose up
+
+version: '2'
+
+services:
+  www:
+    image: busybox:latest
+    container_name: www
+    restart: always
+    privileged: true
+    tty: true
+    volumes:
+      # - ../:/www
+      - ./data:/data
+      - ../../myGithub:/www/myGithub
+      - ../../taobao:/www/taobao
+      - ../../testCode:/www/test
+    networks:
+      - lnmpv3_network
+    environment:
+      - TZ=Asia/Shanghai
+      - WWW_HOST=www
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    privileged: true
+    tty: true
+    depends_on:
+      - php
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d/:/etc/nginx/conf.d/:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ca/:/etc/nginx/ca
+      - ./nginx/log:/var/log/nginx/:rw
+    volumes_from:
+      - www
+    networks:
+      - lnmpv3_network
+    environment:
+      - TZ=Asia/Shanghai
+      - NGINX_HOST=www
+#    extra_hosts:
+#      - localhost:127.0.0.1
+#      - xxnapi.me:127.0.0.1
+#      - xxnadmin.me:127.0.0.1
+#      - douyin.me:127.0.0.1
+#      - yiyao.local:127.0.0.1
+#      - myshop.local:127.0.0.1
+#      - blog.local:127.0.0.1
+#      - test.local:127.0.0.1
+
+  php:
+    image: registry.cn-hangzhou.aliyuncs.com/soft_image/php:7.1.23-fpm
+    container_name: php
+    restart: always
+    privileged: true
+    ports:
+      - "9000:9000"
+    depends_on:
+      - mysql
+      - redis
+    volumes:
+      - ./php/php.ini:/usr/local/etc/php/php.ini:ro
+      - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
+      - ./php/php-fpm.d:/usr/local/etc/php-fpm.d
+      - ./php/conf.d:/usr/local/etc/php/conf.d
+      - ./php/log:/var/log/:rw
+      - ./mysql/mysqld:/dev/shm
+    volumes_from:
+      - www
+    networks:
+      - lnmpv3_network
+    extra_hosts:
+      - localhost:127.0.0.1
+    environment:
+      - TZ=Asia/Shanghai
+      - PHP_HOST=php
+
+  mysql:
+    image: mysql:5.6
+    container_name: mysql
+    restart: always
+    privileged: true
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/my.cnf:/etc/mysql/mysql.conf.d/my.cnf:ro
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/log:/var/lib/log
+      - ./mysql/mysqld:/var/run/mysqld
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      # 创建一个用户，初始化一下mysql
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - TZ=Asia/Shanghai
+    networks:
+      - lnmpv3_network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    privileged: true
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/redis.conf:/etc/redis/redis.conf:ro
+      - ./redis/db:/var/db
+      - ./redis/log:/var/log
+    command: redis-server /etc/redis/redis.conf
+    networks:
+      - lnmpv3_network
+    environment:
+      - TZ=Asia/Shanghai
+
+#  mongo:
+#    image: mongo:latest
+#    container_name: mongo
+#    restart: always
+#    privileged: true
+#    ports:
+#      - "27017:27017"
+#    environment:
+#      - MONGO_DATA_DIR=/data/db
+#      - MONGO_LOG_DIR=/data/logs
+#    volumes:
+#      - ./mongo/db:/data/db
+#      - ./mongo/log:/data/logs
+#    networks:
+#      - lnmpv3_network
+
+#  node:
+#    image: registry.cn-hangzhou.aliyuncs.com/soft_image/node:10.16.3
+#    container_name : node
+#    restart: always
+#    privileged: true
+#    tty: true
+#    depends_on:
+#      - mysql
+#    volumes_from:
+#      - www
+#    ports:
+#      - "3000:3000"
+#      - "8080:8080"
+#      - "8081:8081"
+#      - "8082:8082"
+#    # command: /bin/bash -c 'cd /www/taobao/school-talent-market/server && npm run auto'
+#    networks:
+#      - lnmpv3_network
+#    environment:
+#      - TZ=Asia/Shanghai
+
+networks:
+  lnmpv3_network:
+    driver: bridge
