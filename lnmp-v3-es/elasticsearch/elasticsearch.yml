@@ -1,0 +1,9 @@
+cluster.name: docker-cluster
+cluster.initial_master_nodes: ["master"]
+network.host: 0.0.0.0
+node.name: master
+node.master: true
+node.data: true
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+discovery.zen.minimum_master_nodes: 1
