@@ -10,8 +10,6 @@
 
 .*
 *.log
-**/*.log
-**/**/*.log
-runtime
+
 !.gitignore
 !.htaccess
