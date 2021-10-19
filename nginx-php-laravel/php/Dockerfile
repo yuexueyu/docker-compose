@@ -82,4 +82,3 @@ RUN apk --no-cache add shadow && \
 # image description
 LABEL Author="Jack"
 LABEL Version="2021.10.15"
-LABEL Description="nginx:stable+php:php:7.4-fpm-alpine laravel环境镜像"
