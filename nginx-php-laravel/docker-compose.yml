@@ -1,0 +1,51 @@
+#
+#  cd php && docker build -t php:7.4-fpm-alpine-laravel .
+#
+#  docker-compose up -d
+#
+#  http://laravel.local/phpinfo
+
+version: '2'
+
+services:
+  laravel-php:
+    image: php:7.4-fpm-alpine-laravel
+    container_name: laravel-php
+    restart: unless-stopped
+    privileged: true
+    tty: true
+    ports:
+      - "9000:9000"
+    depends_on:
+      - laravel-nginx
+    volumes:
+      - ../../zhongyuanibCode/zhongyuan/insPlatform/nonCarService/new-cpi-policy:/www
+      - ./php/php.ini:/usr/local/etc/php/php.ini:ro
+      - ./php/log:/tmp/logs/php/:rw
+      - ./php/log:/tmp/logs/php-fpm:rw
+    networks:
+      - laravel_network
+    environment:
+      - TZ=Asia/Shanghai
+
+  laravel-nginx:
+    image: nginx:stable
+    container_name: laravel-nginx
+    restart: unless-stopped
+    privileged: true
+    tty: true
+    ports:
+      - "80:80"
+    volumes:
+      - ../../zhongyuanibCode/zhongyuan/insPlatform/nonCarService/new-cpi-policy:/www
+      - ./nginx/conf.d/:/etc/nginx/conf.d/:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/log:/tmp/logs/nginx:rw
+    networks:
+      - laravel_network
+    environment:
+      - TZ=Asia/Shanghai
+
+networks:
+  laravel_network:
+    driver: bridge

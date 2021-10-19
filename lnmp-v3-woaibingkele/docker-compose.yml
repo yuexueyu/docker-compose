@@ -18,13 +18,14 @@ services:
   www:
     image: busybox:latest
     container_name: www
-    restart: always
+    restart: "no"
     privileged: true
     tty: true
     volumes:
       - ./data:/data
       - ../../testCode:/www/test
       - ../../woaibingkele:/www/woaibingkele
+      - ../../zhongyuanibCode/zhongyuan/backend:/www/zhongyuanibCode/zhongyuan/backend
     networks:
       - lnmpv3_network
     environment:
@@ -33,7 +34,7 @@ services:
   nginx:
     image: nginx:latest
     container_name: nginx
-    restart: always
+    restart: "no"
     privileged: true
     tty: true
     depends_on:
@@ -56,12 +57,12 @@ services:
   php:
     image: registry.cn-hangzhou.aliyuncs.com/soft_image/php:7.1.23-fpm
     container_name: php
-    restart: always
+    restart: "no"
     privileged: true
     ports:
       - "9000:9000"
     depends_on:
-#      - mysql
+      - mysql
       - redis
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini:ro
@@ -77,31 +78,31 @@ services:
     environment:
       - TZ=Asia/Shanghai
 
-#  mysql:
-#    image: mysql:5.6
-#    container_name: mysql
-#    restart: always
-#    privileged: true
-#    ports:
-#      - "3306:3306"
-#    volumes:
-#      - ./mysql/my.cnf:/etc/mysql/mysql.conf.d/my.cnf:ro
-#      - ./mysql/data:/var/lib/mysql
-#      - ./mysql/log:/var/lib/log
-#      - ./mysql/mysqld:/var/run/mysqld
-#    environment:
-#      - MYSQL_ROOT_PASSWORD=root
-#      # 创建一个用户，初始化一下mysql
-#      - MYSQL_USER=root
-#      - MYSQL_PASSWORD=root
-#      - TZ=Asia/Shanghai
-#    networks:
-#      - lnmpv3_network
+  mysql:
+    image: mysql:5.6
+    container_name: mysql
+    restart: "no"
+    privileged: true
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/my.cnf:/etc/mysql/mysql.conf.d/my.cnf:ro
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/log:/var/lib/log
+      - ./mysql/mysqld:/var/run/mysqld
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      # 创建一个用户，初始化一下mysql
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - TZ=Asia/Shanghai
+    networks:
+      - lnmpv3_network
 
   redis:
     image: redis:latest
     container_name: redis
-    restart: always
+    restart: "no"
     privileged: true
     ports:
       - "6379:6379"
