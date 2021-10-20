@@ -1,3 +1,4 @@
+# composer create-project laravel/laravel example-app
 #
 # nginx:alpine + php:7.4-fpm-alpine laravel环境镜像
 #
@@ -23,6 +24,7 @@ services:
     volumes:
       - ../../zhongyuanibCode/zhongyuan/insPlatform/nonCarService/new-cpi-policy:/www
       - ./php/php.ini:/usr/local/etc/php/php.ini:ro
+      - ./php/php-fpm.conf:/usr/local/etc/php/php-fpm.conf:ro
       - ./php/log:/tmp/logs/php/:rw
       - ./php/log:/tmp/logs/php-fpm:rw
     networks:
