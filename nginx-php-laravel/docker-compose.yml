@@ -1,6 +1,9 @@
-# composer create-project laravel/laravel example-app
+# 说明：nginx:alpine + php:7.4-fpm-alpine laravel环境镜像
 #
-# nginx:alpine + php:7.4-fpm-alpine laravel环境镜像
+# 创建项目
+# composer create-project laravel/laravel example-app
+# 拉取基础镜像
+# docker pull nginx:alpine && docker pull php:7.4-fpm-alpine
 #
 #  cd php && docker build -t php:7.4-fpm-alpine-laravel .
 #
