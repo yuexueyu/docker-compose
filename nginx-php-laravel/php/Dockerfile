@@ -75,10 +75,9 @@ RUN printf "\n" | php -r "copy('https://getcomposer.org/installer', 'composer-se
 #RUN sed -i 's/;date.timezone =/date.timezone = "Asia\/Shanghai"/g' /etc/php7/php.ini
 
 # change www-data's uid and gid for laravel folder permisstion
-RUN apk --no-cache add shadow && \
-    usermod -u 1000 www-data && \
-    groupmod -g 1000 www-data
+RUN printf "\n" | apk --no-cache add shadow \
+    && usermod -u 1000 www-data \
+    && groupmod -g 1000 www-data
 
 # image description
-LABEL Author="Jack"
-LABEL Version="2021.10.15"
+LABEL Author="Jack" Version="2021.10.15"
