@@ -1,13 +1,13 @@
 ## Alpine Linux 源 ### 
 ## 源文件配置地址：/etc/apk/repositories ### 
-## 替换原来的配置，以提高 apk update 速度 ### 
+## 替换原来的配置，以提高 apk update 速度 ###
 
 
 ### 清华 ###
 # https://mirrors.tuna.tsinghua.edu.cn/alpine/latest-stable/main
 # https://mirrors.tuna.tsinghua.edu.cn/alpine/latest-stable/community
 
-### 科大 ### 
+### 科大 ###
 # https://mirrors.ustc.edu.cn/alpine/latest-stable/main
 # https://mirrors.ustc.edu.cn/alpine/latest-stable/community
 

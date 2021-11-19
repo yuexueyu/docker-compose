@@ -1,0 +1,60 @@
+# 说明：nginx:alpine + php:7.4-fpm-alpine laravel环境镜像
+#
+# 创建项目
+# composer create-project laravel/laravel example-app
+# 拉取基础镜像
+# docker pull nginx:alpine && docker pull php:7.4.25-fpm-alpine3.14
+#
+#  cd php && docker build -t php:7.4.25-fpm-alpine3.14-laravel-min .
+#
+#  docker-compose up -d
+#
+#  http://laravel.local/phpinfo
+#
+# nginx:1.21.4-alpine 和 php:7.4.25-fpm-alpine3.14 是当前版本最新的
+
+version: '2'
+
+services:
+  laravel-min-nginx:
+    image: nginx:1.21.4-alpine
+    container_name: laravel-min-nginx
+    restart: unless-stopped
+    privileged: true
+    tty: true
+    ports:
+      - "80:80"
+    volumes:
+      - ../../zhongyuanibCode/zhongyuan/insPlatform/nonCarService/piccpropertyV20:/var/www
+      - ./nginx/conf.d/:/etc/nginx/conf.d/:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/log:/tmp/logs/nginx:rw
+    networks:
+      - laravel_min_network
+    environment:
+      - TZ=Asia/Shanghai
+
+  laravel-min-php:
+    image: php:7.4.25-fpm-alpine3.14-laravel-min
+    container_name: laravel-min-php
+    restart: unless-stopped
+    privileged: true
+    tty: true
+    ports:
+      - "9000:9000"
+    depends_on:
+      - laravel-min-nginx
+    volumes:
+      - ../../zhongyuanibCode/zhongyuan/insPlatform/nonCarService/piccpropertyV20:/var/www
+      - ./php/php.ini:/usr/local/etc/php/php.ini:ro
+      - ./php/php-fpm.conf:/usr/local/etc/php/php-fpm.conf:ro
+      - ./php/log:/tmp/logs/php/:rw
+      - ./php/log:/tmp/logs/php-fpm:rw
+    networks:
+      - laravel_min_network
+    environment:
+      - TZ=Asia/Shanghai
+
+networks:
+  laravel_min_network:
+    driver: bridge
