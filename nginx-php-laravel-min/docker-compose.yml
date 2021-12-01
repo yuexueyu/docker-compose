@@ -46,6 +46,7 @@ services:
       - laravel-min-nginx
     volumes:
       - ../../zhongyuanibCode/zhongyuan/insPlatform/nonCarService/piccpropertyV20:/var/www
+      - ../..:/all
       - ./php/php.ini:/usr/local/etc/php/php.ini:ro
       - ./php/php-fpm.conf:/usr/local/etc/php/php-fpm.conf:ro
       - ./php/log:/tmp/logs/php/:rw

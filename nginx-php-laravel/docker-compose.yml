@@ -48,6 +48,7 @@ services:
       - "80:80"
     volumes:
       - ../../zhongyuanibCode/zhongyuan/insPlatform/nonCarService/piccpropertyV20:/www
+      - ../../studyProject/hexo-blog:/hexo
       - ./nginx/conf.d/:/etc/nginx/conf.d/:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/log:/tmp/logs/nginx:rw

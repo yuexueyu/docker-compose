@@ -23,7 +23,6 @@ RUN apk add --update --no-cache \
     jpegoptim \
     pngquant \
     optipng \
-    supervisor \
     nano \
     icu-dev \
     tzdata \
@@ -57,19 +56,13 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV PATH="./vendor/bin:$PATH"
 
 ADD opcache.ini $PHP_INI_DIR/conf.d/
-ADD php.ini $PHP_INI_DIR/conf.d/
-ADD php-fpm.conf $PHP_INI_DIR/conf.d/
-
-# Setup Crond and Supervisor by default
-RUN echo '*  *  *  *  * /usr/local/bin/php  /var/www/artisan schedule:run >> /dev/null 2>&1' > /etc/crontabs/root && mkdir /etc/supervisor.d
-ADD master.ini /etc/supervisor.d/
+# ADD php.ini $PHP_INI_DIR/conf.d/
+# ADD php-fpm.conf $PHP_INI_DIR/conf.d/
 
 # Remove Build Dependencies
 RUN apk del -f .build-deps && rm -rf /var/cache/apk/*
 # Setup Working Dir
 WORKDIR /var/www
 
-CMD ["/usr/bin/supervisord"]
-
 # image description
-LABEL Author="Jack" Version="2021.11.19"
+LABEL Author="Jack" Version="2021.12.01"
