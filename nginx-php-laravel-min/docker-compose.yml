@@ -23,7 +23,7 @@ services:
     privileged: true
     tty: true
     ports:
-      - "80:80"
+      - "8011:8011"
     volumes:
       - ../../zhongyuanibCode/zhongyuan/insPlatform/nonCarService/piccpropertyV20:/var/www
       - ./nginx/conf.d/:/etc/nginx/conf.d/:ro
