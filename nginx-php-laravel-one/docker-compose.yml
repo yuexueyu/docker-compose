@@ -1,0 +1,26 @@
+version: '2'
+
+services:
+  laravel-one:
+    image: laravel-one:7.4.25-fpm-alpine3.14-laravel-one
+    container_name: laravel-one
+    restart: unless-stopped
+    privileged: true
+    tty: true
+    ports:
+      - "8011:80"
+    volumes:
+      - ../../zhongyuanibCode/zhongyuan/insPlatform/nonCarService/piccpropertyV20:/var/www
+      - ./logs:/tmp/logs:rw
+#      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+#      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+#      - ./php/php.ini:/usr/local/etc/php/php.ini:ro
+#      - ./php/php-fpm.conf:/usr/local/etc/php/php-fpm.conf:ro
+    networks:
+      - laravel-one-network
+    environment:
+      - TZ=Asia/Shanghai
+
+networks:
+  laravel-one-network:
+    driver: bridge
