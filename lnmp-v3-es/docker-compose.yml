@@ -1,38 +1,24 @@
-#  以前的仅供参考
-#  以后部署，和线上环境保持一致
-#  
-#
-#  docker pull busybox:latest
-#  docker pull nginx:latest
-#  docker pull php:7.2-fpm
-#  docker pull mysql:5.6
-#  docker pull redis:latest
-#
-#  cd php && docker build -t php:7.2-fpm-build .
-#
-#  docker-compose up
-
 version: '2'
 
 services:
-#  www:
-#    image: busybox:latest
-#    container_name: www
-#    restart: always
-#    privileged: true
-#    tty: true
-#    volumes:
-#      - ./data:/data
-#      - ../../testCode:/www/test
-#    networks:
-#      - lnmpv3_network
-#    environment:
-#      - TZ=Asia/Shanghai
+  www:
+    image: busybox:stable
+    container_name: www
+    restart: "no"
+    privileged: true
+    tty: true
+    volumes:
+      - ./shared:/mnt/shared
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      bookes_network:
+        ipv4_address: 192.181.1.10
 #
 #  nginx:
 #    image: nginx:latest
 #    container_name: nginx
-#    restart: always
+#    restart: "no"
 #    privileged: true
 #    tty: true
 #    depends_on:
@@ -48,14 +34,14 @@ services:
 #    volumes_from:
 #      - www
 #    networks:
-#      - lnmpv3_network
+#      - bookes_network
 #    environment:
 #      - TZ=Asia/Shanghai
 #
 #  php:
 #    image: registry.cn-hangzhou.aliyuncs.com/soft_image/php:7.1.23-fpm
 #    container_name: php
-#    restart: always
+#    restart: "no"
 #    privileged: true
 #    ports:
 #      - 9000:9000
@@ -72,35 +58,38 @@ services:
 #    volumes_from:
 #      - www
 #    networks:
-#      - lnmpv3_network
+#      - bookes_network
 #    environment:
 #      - TZ=Asia/Shanghai
 #
-#  mysql:
-#    image: mysql:5.6
-#    container_name: mysql
-#    restart: always
-#    privileged: true
-#    ports:
-#      - 3306:3306
-#    volumes:
-#      - ./mysql/my.cnf:/etc/mysql/mysql.conf.d/my.cnf:ro
-#      - ./mysql/data:/var/lib/mysql
-#      - ./mysql/log:/var/lib/log
-#      - ./mysql/mysqld:/var/run/mysqld
-#    environment:
-#      - MYSQL_ROOT_PASSWORD=root
-#      # 创建一个用户，初始化一下mysql
-#      - MYSQL_USER=root
-#      - MYSQL_PASSWORD=root
-#      - TZ=Asia/Shanghai
-#    networks:
-#      - lnmpv3_network
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    restart: "no"
+    privileged: true
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/my.cnf:/etc/mysql/mysql.conf.d/my.cnf:ro
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/log:/var/lib/log
+      - ./mysql/mysqld:/var/run/mysqld
+    volumes_from:
+      - www
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      # 创建一个用户，初始化一下mysql
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - TZ=Asia/Shanghai
+    networks:
+      bookes_network:
+        ipv4_address: 192.181.1.15
 #
 #  redis:
 #    image: redis:latest
 #    container_name: redis
-#    restart: always
+#    restart: "no"
 #    privileged: true
 #    ports:
 #      - 6379:6379
@@ -110,60 +99,86 @@ services:
 #      - ./redis/log:/var/log
 #    command: redis-server /etc/redis/redis.conf
 #    networks:
-#      - lnmpv3_network
+#      - bookes_network
 #    environment:
 #      - TZ=Asia/Shanghai
 
   elasticsearch:
-    image: elasticsearch:7.12.1
+    image: elasticsearch:7.17.2
     container_name : elasticsearch
-    restart: always
+    restart: "no"
     privileged: true
     ports:
       - 9200:9200
       - 9300:9300
     volumes:
       - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./elasticsearch/config/elastic-certificates.p12:/usr/share/elasticsearch/config/elastic-certificates.p12
       - ./elasticsearch/data:/usr/share/elasticsearch/data
       - ./elasticsearch/logs:/usr/share/elasticsearch/logs
       - ./elasticsearch/plugins:/usr/share/elasticsearch/plugins
 #      - ./elasticsearch/analysis:/usr/share/elasticsearch/config/analysis
+    volumes_from:
+      - www
     environment:
       - 'ES_JAVA_OPTS=-Xms256m -Xmx256m'
     networks:
-      lnmpv3_network:
+      bookes_network:
         ipv4_address: 192.181.1.16
 
   elasticsearch-head:
     image: mobz/elasticsearch-head:5
     container_name : elasticsearch-head
-    restart: always
+    restart: "no"
     privileged: true
     ports:
       - 9100:9100
     depends_on:
       - elasticsearch
+    volumes_from:
+      - www
     networks:
-      lnmpv3_network:
+      bookes_network:
         ipv4_address: 192.181.1.17
 
   kibana:
-    image: kibana:7.12.1
+    image: kibana:7.17.2
     container_name : kibana
-    restart: always
+    restart: "no"
     privileged: true
     ports:
       - 5601:5601
     volumes:
       - ./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    volumes_from:
+      - www
     depends_on:
       - elasticsearch
     networks:
-      lnmpv3_network:
+      bookes_network:
         ipv4_address: 192.181.1.18
 
+  nifi:
+    image: apache/nifi:1.16.0
+    container_name : nifi
+    restart: "no"
+    privileged: true
+    ports:
+      - 9090:8080
+    depends_on:
+      - mysql
+    volumes:
+      - ./apache-nifi/MySQLConnectorJ:/mnt/MySQLConnectorJ
+    volumes_from:
+      - www
+    environment:
+      - NIFI_WEB_HTTP_PORT=8080
+    networks:
+      bookes_network:
+        ipv4_address: 192.181.1.19
+
 networks:
-  lnmpv3_network:
+  bookes_network:
     driver: bridge
     ipam:
       driver: default

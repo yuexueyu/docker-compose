@@ -1,7 +1,11 @@
 server.name: kibana
-server.host: "0"
-#server.host: "0.0.0.0"
-elasticsearch.hosts: [ "http://elasticsearch:9200" ]
-#elasticsearch.hosts: [ "http://192.181.1.16:9200" ]
+#server.host: "0"
+server.host: "0.0.0.0"
+server.port: 5601
+#elasticsearch.hosts: [ "http://elasticsearch:9200" ]
+elasticsearch.hosts: [ "http://192.181.1.16:9200" ]
 monitoring.ui.container.elasticsearch.enabled: true
 i18n.locale: "zh-CN"
+elasticsearch.username: "elastic"
+elasticsearch.password: "JEcejZTBDTrfUU483KZR"
+xpack.security.encryptionKey: "something_at_least_32_characters"

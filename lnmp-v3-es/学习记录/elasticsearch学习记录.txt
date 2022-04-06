@@ -1,0 +1,83 @@
+下载对应版本的插件
+https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.17.2/elasticsearch-analysis-ik-7.17.2.zip
+https://artifacts.elastic.co/downloads/elasticsearch-plugins/ingest-attachment/ingest-attachment-7.17.2.zip
+
+解压，放到 elasticsearch/plugins 目录中，不要有 .DS_Store
+
+待学习
+elasticsearch
+elasticsearch-head
+kibana
+
+中文分词插件
+elasticsearch-analysis-ik
+
+文本抽取插件
+ingest-attachment
+
+Apache NiFi
+
+
+CREATE TABLE `book` (
+  `id` varchar(100) NOT NULL,
+  `title` varchar(50) DEFAULT NULL,
+  `desc` varchar(1000) DEFAULT NULL,
+  `path` varchar(200) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `book` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自増主键id',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+  `title` varchar(64) NOT NULL DEFAULT '' COMMENT '书名',
+  `desc` varchar(1500) NOT NULL DEFAULT '' COMMENT '介绍',
+  `path` varchar(200) NOT NULL DEFAULT '' COMMENT '存储路径',
+  `import_es` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否导入es',
+  PRIMARY KEY (`id`),
+  KEY `key_title` (`title`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='电子书';
+
+数据库 books
+账号 root
+密码 root
+
+/mnt/MySQLConnectorJ/mysql-connector-java-8.0.27/mysql-connector-java-8.0.27.jar
+
+几个容器共享目录和数据的问题。需要开启新容器 www busybox
+
+
+INSERT INTO `book` (`id`, `create_time`, `update_time`, `title`, `desc`, `path`, `import_es`) VALUES
+('1', '2022-04-06 09:25:08', '2022-04-06 09:25:08', '召唤兽是只喵', '召唤兽是只喵', '/mnt/shared/books/召唤兽是只喵.txt', '0'),
+('2', '2022-04-06 09:25:08', '2022-04-06 09:25:08', '不一样的日本战国', '不一样的日本战国', '/mnt/shared/books/不一样的日本战国.txt', '0'),
+('3', '2022-04-06 09:25:08', '2022-04-06 09:25:08', '我在东京与都市传说为', '我在东京与都市传说为', '/mnt/shared/books/我在东京与都市传说为.txt', '0'),
+('4', '2022-04-06 09:25:08', '2022-04-06 09:25:08', '精灵之混吃等死训练家', '精灵之混吃等死训练家', '/mnt/shared/books/精灵之混吃等死训练家.txt', '0'),
+('5', '2022-04-06 09:25:08', '2022-04-06 09:25:08', '中国百科全书', '中国百科全书', '/mnt/shared/books/中国百科全书.txt', '0');
+
+
+在es中初始化
+bin/elasticsearch-setup-passwords auto
+
+Changed password for user apm_system
+PASSWORD apm_system = rDaN7xGMrh666xsroETK
+
+Changed password for user kibana_system
+PASSWORD kibana_system = KGiqRZcAazRLrfg8yQRh
+
+Changed password for user kibana
+PASSWORD kibana = KGiqRZcAazRLrfg8yQRh
+
+Changed password for user logstash_system
+PASSWORD logstash_system = spmPcXBzYBdbShPBIdBy
+
+Changed password for user beats_system
+PASSWORD beats_system = 8y73647Fhh362RyJmMVF
+
+Changed password for user remote_monitoring_user
+PASSWORD remote_monitoring_user = KiI3Qf1ltwZngz1vdBbX
+
+Changed password for user elastic
+PASSWORD elastic = JEcejZTBDTrfUU483KZR
